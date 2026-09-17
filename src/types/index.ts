@@ -103,7 +103,7 @@ export type BrowseStackParamList = {
   EventList: undefined;
   EventDetail: { eventId: string };
   BookingFlow: { eventId: string };
-  BookingConfirmation: { bookingId: string };
+  BookingConfirmation: { bookingId: string; eventTitle: string };
 };
 
 export type OrganizerStackParamList = {

@@ -118,7 +118,10 @@ export default function BookingFlowScreen({ route, navigation }: Props) {
       });
 
       // Transaction successful, go to confirmation
-      navigation.replace('BookingConfirmation', { bookingId: bookingRef.id });
+      navigation.replace('BookingConfirmation', { 
+        bookingId: bookingRef.id, 
+        eventTitle: event.title 
+      });
 
     } catch (error: any) {
       Alert.alert('Booking Failed', error.message || 'An error occurred during booking.');

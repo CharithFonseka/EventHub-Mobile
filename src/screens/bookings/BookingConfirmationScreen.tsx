@@ -5,14 +5,16 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BrowseStackParamList } from '../../types';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import GradientButton from '../../components/ui/GradientButton';
+import { notifyBookingConfirmed } from '../../utils/notifications';
 
 type Props = NativeStackScreenProps<BrowseStackParamList, 'BookingConfirmation'>;
 
 export default function BookingConfirmationScreen({ route, navigation }: Props) {
-  const { bookingId } = route.params;
+  const { bookingId, eventTitle } = route.params;
 
   useEffect(() => {
-    // Stage 8 foundation: Triggering a basic alert now, to be replaced by expo-notifications
+    // Show local notification
+    notifyBookingConfirmed(eventTitle, bookingId);
     Alert.alert(
       "🎟️ Booking Confirmed!",
       "Your tickets have been secured successfully. We'll remind you before the event starts."
