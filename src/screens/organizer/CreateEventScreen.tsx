@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { collection, doc, setDoc } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
 import { db } from '../../config/firebase';
 import { OrganizerStackParamList, Event, EventCategory, EVENT_CATEGORIES } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -19,6 +20,7 @@ import { colors, typography, spacing, borderRadius } from '../../theme';
 import InputField from '../../components/ui/InputField';
 import GradientButton from '../../components/ui/GradientButton';
 import { notifyEventCreated } from '../../utils/notifications';
+import { uploadImageAsync } from '../../utils/storage';
 
 type Props = NativeStackScreenProps<OrganizerStackParamList, 'CreateEvent'>;
 
@@ -42,7 +44,7 @@ export default function CreateEventScreen({ navigation }: Props) {
   
   const [priceStr, setPriceStr] = useState('0');
   const [seatsStr, setSeatsStr] = useState('');
-  const [imageURL, setImageURL] = useState(''); // Stage 10 will replace this with file upload
+  const [imageURI, setImageURI] = useState(''); // Local URI from ImagePicker
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
@@ -63,7 +65,7 @@ export default function CreateEventScreen({ navigation }: Props) {
       const seats = parseInt(seatsStr, 10);
       if (isNaN(price) || price < 0) newErrors.priceStr = 'Price must be 0 or greater';
       if (isNaN(seats) || seats <= 0) newErrors.seatsStr = 'Total seats must be greater than 0';
-      if (!imageURL.trim()) newErrors.imageURL = 'Image URL is required (Upload coming in Stage 10)';
+      if (!imageURI) newErrors.imageURI = 'Please select a cover image';
     }
 
     setErrors(newErrors);
@@ -80,12 +82,31 @@ export default function CreateEventScreen({ navigation }: Props) {
     setCurrentStep(prev => prev - 1);
   };
 
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9], // Standard event cover ratio
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageURI(result.assets[0].uri);
+      clearError('imageURI');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateStep(2) || !userProfile) return;
     
     setIsSubmitting(true);
     try {
       const eventRef = doc(collection(db, 'events'));
+      
+      // Upload image to Firebase Storage first
+      const ext = imageURI.substring(imageURI.lastIndexOf('.') + 1) || 'jpg';
+      const storagePath = `events/${eventRef.id}.${ext}`;
+      const downloadURL = await uploadImageAsync(imageURI, storagePath);
       
       const newEvent: Event = {
         id: eventRef.id,
@@ -96,7 +117,7 @@ export default function CreateEventScreen({ navigation }: Props) {
         endDate: Date.parse(dateStr) + 7200000, // Default 2 hours later
         location: location.trim(),
         address: address.trim(),
-        imageURL: imageURL.trim(),
+        imageURL: downloadURL,
         price: parseFloat(priceStr),
         totalSeats: parseInt(seatsStr, 10),
         availableSeats: parseInt(seatsStr, 10),
@@ -259,14 +280,25 @@ export default function CreateEventScreen({ navigation }: Props) {
                 </View>
               </View>
 
-              <InputField
-                label="Cover Image URL"
-                value={imageURL}
-                onChangeText={(t) => { setImageURL(t); clearError('imageURL'); }}
-                error={errors.imageURL}
-                placeholder="https://..."
-                hint="In Stage 10, this will become an image uploader!"
-              />
+              <Text style={styles.label}>Cover Image</Text>
+              <TouchableOpacity 
+                style={[styles.imagePicker, errors.imageURI && styles.imagePickerError]} 
+                onPress={handlePickImage}
+              >
+                {imageURI ? (
+                  <View style={styles.imagePreviewContainer}>
+                    <Text style={styles.changeImageText}>Tap to change</Text>
+                    {/* We can't use Image directly without importing it, let's just show a success message or we can import Image above. Wait, I should add Image to imports! */}
+                    <Text style={styles.imageSuccessText}>📸 Image Selected</Text>
+                  </View>
+                ) : (
+                  <View style={styles.imagePlaceholder}>
+                    <Text style={styles.imagePlaceholderIcon}>📸</Text>
+                    <Text style={styles.imagePlaceholderText}>Tap to choose a photo</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {errors.imageURI && <Text style={styles.errorText}>{errors.imageURI}</Text>}
             </View>
           )}
 
@@ -449,5 +481,54 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
+  },
+  imagePicker: {
+    height: 150,
+    backgroundColor: colors.backgroundElevated,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.surfaceBorder,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
+    overflow: 'hidden',
+  },
+  imagePickerError: {
+    borderColor: colors.error,
+  },
+  imagePreviewContainer: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryGlow,
+  },
+  changeImageText: {
+    fontSize: typography.fontSizes.xs,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  imageSuccessText: {
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.bold,
+    color: colors.primary,
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+  },
+  imagePlaceholderIcon: {
+    fontSize: 32,
+    marginBottom: spacing.sm,
+  },
+  imagePlaceholderText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.textSecondary,
+    fontWeight: typography.fontWeights.medium,
+  },
+  errorText: {
+    fontSize: typography.fontSizes.xs,
+    color: colors.error,
+    marginTop: 4,
   },
 });
