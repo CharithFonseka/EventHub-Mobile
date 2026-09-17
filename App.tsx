@@ -1,0 +1,23 @@
+// App.tsx — EventHub root component
+import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from './src/contexts/AuthContext';
+import { EventsProvider } from './src/contexts/EventsContext';
+import { BookingsProvider } from './src/contexts/BookingsContext';
+import RootNavigator from './src/navigation/RootNavigator';
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StatusBar style="light" backgroundColor="#0D1B2A" />
+      <AuthProvider>
+        <EventsProvider>
+          <BookingsProvider>
+            <RootNavigator />
+          </BookingsProvider>
+        </EventsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
+}
