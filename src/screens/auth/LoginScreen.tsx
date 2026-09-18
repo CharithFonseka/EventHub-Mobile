@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { AuthStackParamList } from '../../types';
@@ -45,7 +45,12 @@ export default function LoginScreen({ navigation }: Props) {
       // RootNavigator will detect auth state change and redirect to Main
     } catch (err: any) {
       const message = formatFirebaseError(err.code);
-      Alert.alert('Login Failed', message);
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: message,
+        position: 'bottom',
+      });
     } finally {
       setIsLoading(false);
     }

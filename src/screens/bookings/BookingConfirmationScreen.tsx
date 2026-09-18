@@ -1,6 +1,6 @@
 // src/screens/bookings/BookingConfirmationScreen.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BrowseStackParamList } from '../../types';
 import { colors, typography, spacing, borderRadius } from '../../theme';
@@ -15,11 +15,7 @@ export default function BookingConfirmationScreen({ route, navigation }: Props) 
   useEffect(() => {
     // Show local notification
     notifyBookingConfirmed(eventTitle, bookingId);
-    Alert.alert(
-      "🎟️ Booking Confirmed!",
-      "Your tickets have been secured successfully. We'll remind you before the event starts."
-    );
-  }, []);
+  }, [eventTitle, bookingId]);
 
   return (
     <View style={styles.container}>

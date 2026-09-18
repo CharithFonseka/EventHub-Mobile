@@ -12,6 +12,7 @@ import {
   Alert
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { OrganizerStackParamList, Event } from '../../types';
@@ -70,11 +71,20 @@ export default function OrganizerDashboardScreen({ navigation }: Props) {
     const result = await seedEvents();
     setIsSeeding(false);
     if (result.success) {
-      Alert.alert('Success', result.message);
-      // We don't fetchMyEvents here because seed events are assigned to 'seed-organizer', 
-      // not the current user. They will show up in the Browse tab.
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: result.message,
+        position: 'bottom',
+      });
+      // We don't fetchMyEvents here because seed events are assigned to 'seed-organizer'
     } else {
-      Alert.alert('Error', result.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: result.message,
+        position: 'bottom',
+      });
     }
   };
 

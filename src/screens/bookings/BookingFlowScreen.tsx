@@ -8,9 +8,9 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ActivityIndicator,
-  Alert
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { doc, getDoc, runTransaction, collection, doc as firestoreDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { BrowseStackParamList, Event, Booking } from '../../types';
@@ -124,7 +124,12 @@ export default function BookingFlowScreen({ route, navigation }: Props) {
       });
 
     } catch (error: any) {
-      Alert.alert('Booking Failed', error.message || 'An error occurred during booking.');
+      Toast.show({
+        type: 'error',
+        text1: 'Booking Failed',
+        text2: error.message || 'An error occurred during booking.',
+        position: 'bottom',
+      });
     } finally {
       setIsBooking(false);
     }

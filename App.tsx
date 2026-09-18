@@ -7,6 +7,7 @@ import { EventsProvider } from './src/contexts/EventsContext';
 import { BookingsProvider } from './src/contexts/BookingsContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { setupNotifications } from './src/utils/notifications';
+import Toast from 'react-native-toast-message';
 
 export default function App() {
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function App() {
           </BookingsProvider>
         </EventsProvider>
       </AuthProvider>
+      <Toast />
     </SafeAreaProvider>
   );
 }

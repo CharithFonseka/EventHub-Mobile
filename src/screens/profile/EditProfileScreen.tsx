@@ -7,9 +7,9 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
@@ -58,11 +58,20 @@ export default function EditProfileScreen({ navigation }: Props) {
       });
 
       await refreshUserProfile();
-      Alert.alert('Success', 'Profile updated successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Profile updated successfully!',
+        position: 'bottom',
+      });
+      navigation.goBack();
     } catch (err) {
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update profile. Please try again.',
+        position: 'bottom',
+      });
     } finally {
       setIsLoading(false);
     }

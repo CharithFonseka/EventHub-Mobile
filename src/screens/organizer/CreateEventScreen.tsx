@@ -13,6 +13,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
+import Toast from 'react-native-toast-message';
 import { db } from '../../config/firebase';
 import { OrganizerStackParamList, Event, EventCategory, EVENT_CATEGORIES } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -134,12 +135,21 @@ export default function CreateEventScreen({ navigation }: Props) {
       // Trigger local notification
       notifyEventCreated(newEvent.title);
 
-      Alert.alert('Success!', 'Your event has been published successfully.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Your event has been published successfully.',
+        position: 'bottom',
+      });
+      navigation.goBack();
       
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create event');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error.message || 'Failed to create event',
+        position: 'bottom',
+      });
     } finally {
       setIsSubmitting(false);
     }

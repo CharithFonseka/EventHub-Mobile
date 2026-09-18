@@ -10,6 +10,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { BookingsStackParamList, Booking } from '../../types';
@@ -78,10 +79,20 @@ export default function TicketDetailScreen({ route, navigation }: Props) {
               // Update local state and context
               setBooking({ ...booking, status: 'cancelled' });
               updateBooking(booking.id, { status: 'cancelled' });
-              Alert.alert('Cancelled', 'Your booking has been cancelled successfully.');
+              Toast.show({
+                type: 'success',
+                text1: 'Cancelled',
+                text2: 'Your booking has been cancelled successfully.',
+                position: 'bottom',
+              });
 
             } catch (error: any) {
-              Alert.alert('Error', 'Failed to cancel booking. Please try again.');
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to cancel booking. Please try again.',
+                position: 'bottom',
+              });
             } finally {
               setIsCancelling(false);
             }

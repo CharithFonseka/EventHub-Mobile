@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
@@ -93,7 +93,12 @@ export default function RegisterScreen({ navigation }: Props) {
       // RootNavigator picks up auth state change → navigates to Main
     } catch (err: any) {
       const message = formatFirebaseError(err.code);
-      Alert.alert('Registration Failed', message);
+      Toast.show({
+        type: 'error',
+        text1: 'Registration Failed',
+        text2: message,
+        position: 'bottom',
+      });
     } finally {
       setIsLoading(false);
     }
